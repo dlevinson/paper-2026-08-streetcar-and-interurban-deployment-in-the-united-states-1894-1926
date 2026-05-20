@@ -1,0 +1,767 @@
+\newpage
+\section{Appendix E}
+This section presents the full, unannotated code used for the extraction of data. Note that for 1911 and 1914, the miles code used 'Track and Equipment' instead of 'Plant and Equipment'. However, as the code is elsewise identical, it has not been repeated in its own section. '---' is used to represent em-dashes
+
+The section also gives an annotated copy of the code used to fit S-curve models.
+
+\subsection{Extraction of entries from 1894-1914}
+\begin{lstlisting}[language=Python]
+import pandas as pd
+import re
+import matplotlib.pyplot as plt
+import numpy as np
+from re import search
+import string
+from fuzzywuzzy import fuzz
+from fuzzywuzzy import process
+import csv
+
+def read_file(year):
+    out = None
+    with open(
+        f'{year} TXT.txt', #text file name
+        encoding="utf8"
+    ) as f:
+        out = pd.DataFrame(f)
+        out['Info'] = out[0].apply(lambda x: x.strip())
+        out['Year'] = year
+        out = out.drop(columns=[0])
+    return out
+
+def hasNumbers(inputString):
+    return bool(re.search(r'\d', inputString))   
+
+def capratio(bits):
+    start = 0
+    ratio = 0
+    translator = bits.maketrans('', '', string.punctuation)
+    ring = bits.translate(translator)
+    ringing = ring.replace(' ', '')
+    
+    for i in range(len(bits)):
+        if bits[i].isupper() is True:
+            start = start + 1
+    if len(ringing) > 0:
+        ratio = start/len(ringing)
+    
+    return ratio
+    
+def getcities(Info):
+if capratio(Info) > 0.7 and len(Info) < 30:
+    return Info
+elif len(Info) in range(7,25) and process.extractOne(Info.lower(), cities.str.lower(), scorer=fuzz.ratio)[1] > 80 and hasNumbers(Info) is False:
+    if abs(len(process.extractOne(Info.lower(), cities.str.lower(), scorer=fuzz.ratio)[0]) - len(Info.lower())) < 4:
+        return Info
+else:
+    return 999
+    
+def city2(CityInfo): 
+    if CityInfo != 999 and CityInfo is not None:
+        section = CityInfo
+        if process.extractOne(section.lower(), cities, scorer=fuzz.ratio)[1] > 80:
+            return process.extractOne(section.lower(), cities, scorer=fuzz.ratio)[0]
+        elif process.extractOne(section.lower(), cities, scorer=fuzz.partial_ratio)[1] > 98 and process.extractOne(section.lower(), cities, scorer=fuzz.ratio)[1] > 50:
+            return process.extractOne(section.lower(), cities, scorer=fuzz.partial_ratio)[0]
+        else:
+            return np.nan
+    else:
+        return np.nan
+
+def getcompanies(Info, CleanCity, CompIndex, Truth):
+    try:
+        if len(Info) > 5:
+            if len(re.findall('Funded|leased|Leased|See|Deficit|Interest', Info[0:40])) == 0 and '....' not in Info:
+                if len(re.findall('Charter|Incorp|Succe|consolidation|Connects|This|connect|Organize|organize|Owns|succe|Annual|Formed|nchise', Info)) > 0 or Truth:
+                    for x in CompIndex:
+                        if fuzz.ratio(x[1], CleanCity) > 90:
+                            if x[0] in Info[0:70]:
+                                return x[0]
+                            elif fuzz.partial_ratio(x[0].lower(), Info[0:70].lower()) > 90 and len(Info) > 11:
+                                return x[0]
+                            elif 'Population' in Info:
+                                if fuzz.partial_ratio(x[0].lower(), Info[0:140].lower()) > 90:
+                                    return x[0]
+                            else:
+                                pass
+                        else:
+                            pass
+                else:
+                    pass
+            else:
+                pass
+        else:
+            pass
+    except:
+        pass
+    
+def getcompanies2(Info, CleanCity, CurrentList, CompIndex, Truth):
+    try:
+        if len(Info) > 5:
+            if CurrentList is None:
+                if len(re.findall('Funded|leased|Leased|See|Deficit|Interest', Info[0:40])) == 0 and '....' not in Info:
+                    if len(re.findall('Charter|Incorp|Succe|consolidation|Connects|This|connect|Organize|organize|Owns|succe|Annual|Formed|nchise', Info)) > 0:
+                        for x in CompIndex:
+                            if fuzz.ratio(x[1], CleanCity) > 80:
+                                if fuzz.partial_ratio(x[0].lower(), Info[0:70].lower()) > 80 and len(Info) > 11: 
+                                    return x[0]
+                                elif 'Population' in Info:
+                                    if fuzz.partial_ratio(x[0].lower(), Info[0:140].lower()) > 80:
+                                        return x[0]
+                                else:
+                                    pass
+                            else:
+                                pass
+                        
+                    else:
+                        pass
+                else:
+                    pass
+            else:
+                return CurrentList
+        else:
+            pass
+    except:
+        pass
+        
+def getmiles(Info): 
+    if 'Contemplated' not in Info and 'Proposed' not in Info and 'under construction' not in Info[0:40] and 'power plant' not in Info[0:40]:
+        if fuzz.partial_ratio(Info, 'Plant and Equipment') > 80 and len(Info) > 20 and 'total' in Info:
+            try:
+                split_string = Info.split('total')[1]
+                mile = (re.findall("[+-]?\d+\.+\d+|\d+", split_string))[0]
+                return mile
+            except:
+                return 'No'
+        elif fuzz.partial_ratio(Info, 'Plant and Equipment') > 80 and len(Info) > 20:
+            try:
+                split_string = Info.split('ment')[1]        
+                mile = (re.findall("[+-]?\d+\.+\d+|\d+", split_string))[0]
+                return mile
+            except:
+                return 'No'
+        elif 'Miles of track' in Info[0:60] and 'total' in Info:
+            split_string = Info.split('total')[1]
+            mile = (re.findall("[+-]?\d+\.+\d+|\d+", split_string))[0]
+            return mile
+        elif 'Miles of track' in Info[0:60]:
+            split_string = Info.split('of track')[1]
+            try:
+                mile = (re.findall("[+-]?\d+\.+\d+|\d+", split_string))[0]
+                return mile
+            except:
+                return 'No'
+        elif 'Miles of Track' in Info[0:60]:
+            split_string = Info.split('of track')[1]
+            try:
+                mile = (re.findall("[+-]?\d+\.+\d+|\d+", split_string))[0]
+                return mile
+            except:
+                return 'No'
+        else:
+            return 'No'
+    else:
+        return 'No'
+        
+def getstate(Companies, RealCities, CompIndex):
+    for x in CompIndex:
+        if Companies == x[0] and RealCities == x[1]:
+            return x[2]
+            
+years = [1894] + list(range(1898, 1915))
+for year in years:
+    try:
+        comps = pd.read_csv(f'{year}.csv')
+        comps = comps.drop(['Unnamed: 0'], axis = 1)
+
+        companies = comps['Company']
+        places = comps['Place']
+        cities = comps['Place'].str.split(',').str[0]
+        states = comps['Place'].str.split(',').str[-1]
+
+        index = list(zip(companies, cities, states))
+
+        df = read_file(year)
+
+        value = len(df)
+        start = 0
+        end = 0
+
+        for i in range(value):
+            if 'START OF RECORDS' in df.iloc[i,0]:
+                start = i
+            elif 'END OF RECORDS' in df.iloc[i,0]:
+                end = i+1
+
+        df = df.drop(df.index[end:value])
+        df = df.drop(df.index[0:start])
+        df = df.reset_index(drop=True)
+
+        df['Info'] = df['Info'].str.replace('\t', ' ')
+        df['Info'] = df['Info'].str.replace('. 0.', '. O.')
+        df['Info'] = df['Info'].str.replace(', 0.', ', O.')
+        df = df[df['Info'].map(len) > 4]
+
+        df['Info'].replace('', np.nan, inplace=True)
+        df.dropna(subset=['Info'], inplace=True)
+        df = df.reset_index(drop=True)
+
+        unwanted = []
+
+        for x in df['Info']:
+            if 'MANUAL' in x or 'McGRAW' in x or 'AMERICAN STREET' in x or 'INVESTMENTS' in x or 'UNIVERSITY' in x:
+                unwanted.append(x)
+
+        unwanted = list(set(unwanted))
+
+        df['Unwanted'] = df['Info'].isin(unwanted)
+
+        listA= df[df['Unwanted'] == True].index.tolist()
+
+        listB= []
+
+        for x in listA:
+            try:
+                if capratio(df['Info'][x+1]) < 0.7 and len(df['Info'][x+1]) < 20:
+                   listB.append(x+1)
+                if capratio(df['Info'][x-1]) < 0.7 and len(df['Info'][x-1]) < 20:
+                   listB.append(x-1)
+                if capratio(df['Info'][x+2]) < 0.7 and len(df['Info'][x+2]) < 20:
+                   listB.append(x+2)
+                if capratio(df['Info'][x-2]) < 0.7 and len(df['Info'][x-2]) < 20:
+                   listB.append(x-2)
+                if capratio(df['Info'][x+3]) < 0.7 and len(df['Info'][x+3]) < 20:
+                   listB.append(x+3)
+                if capratio(df['Info'][x-3]) < 0.7 and len(df['Info'][x-3]) < 20:
+                   listB.append(x-3)
+                if capratio(df['Info'][x+4]) < 0.7 and len(df['Info'][x+4]) < 20:
+                   listB.append(x+4)
+                if capratio(df['Info'][x-4]) < 0.7 and len(df['Info'][x-4]) < 20:
+                   listB.append(x-4)
+            except:
+                pass
+
+        listC = listA+listB
+        indexes_to_keep = list(set(list(range(len(df)))) - set(listC))
+        df = df.take(indexes_to_keep)   
+        df = df.reset_index(drop=True)
+        
+        df['Truth'] = df['Info'].str.contains('Capital Stock|Funded Debt')
+        for x in range(len(df['Truth'])):
+            if df['Truth'][x]:
+                df['Truth'][x-1] = True
+                df['Truth'][x-2] = True
+    
+        df['Cities'] = df['Info'].apply(getcities)
+        df['RealCities'] = df['Cities'].apply(city2)
+        df['RealCities'] = df['RealCities'].ffill()
+
+        df['Miles'] = df['Info'].apply(getmiles)
+
+        df['Company'] = df[1:len(df)].apply(lambda x: getcompanies(x.Info, x.RealCities, index, x.Truth), axis=1)
+        df['Company'] = df[1:len(df)].apply(lambda x: getcompanies2(x.Info, x.RealCities, x.Company, index, x.Truth), axis=1)
+
+        for i in range(len(df)):
+            try:
+                if df['Company'][i] is not None and df['Company'][i+1] is None and df['RealCities'][i] == df['RealCities'][i+1]:
+                    df['Company'][i+1] = df['Company'][i]
+            except:
+                pass
+
+        df['State'] = df.apply(lambda x: getstate(x.Company, x.RealCities, index), axis=1)
+
+        extract = []
+
+        for x in range(len(df)):
+            if df['Miles'][x] != 'No':
+                extract.append(x)
+        results = df.take(extract)
+        results = results.drop(columns=['Info', 'Cities', 'Unwanted'])
+        display(results)
+    except:
+        pass
+            
+\end{lstlisting}
+
+\subsection{Extraction of entries from 1917 onwards}
+\begin{lstlisting}
+import pandas as pd
+import re
+import matplotlib.pyplot as plt
+import numpy as np
+import us
+from re import search
+import string
+from fuzzywuzzy import fuzz
+from fuzzywuzzy import process
+import csv
+
+def read_file(year):
+    out = None
+    with open(
+        f'{year} TXT.txt', #text file name
+        encoding="utf8"
+    ) as f:
+        out = pd.DataFrame(f)
+        out['Info'] = out[0].apply(lambda x: x.strip())
+        out['Year'] = year
+        out = out.drop(columns=[0])
+    return out
+
+def hasNumbers(inputString):
+    return bool(re.search(r'\d', inputString))   
+
+def capratio(bits):
+    bits = ''.join((x for x in bits if not x.isdigit()))
+    start = 0
+    ratio = 0
+    translator = bits.maketrans('', '', string.punctuation)
+    ring = bits.translate(translator)
+    ringing = ring.replace(' ', '')
+    
+    for i in range(len(bits)):
+        if bits[i].isupper() is True:
+            start = start + 1
+    if len(ringing) > 0:
+        ratio = start/len(ringing)
+    
+    return ratio
+    
+def get_state(x):
+    if x in states and hasNumbers(x) is False:
+        return x
+    else:
+        return np.nan
+    
+def get_city(x):
+    if capratio(x) > 0.7 and len(x) > 5 and hasNumbers(x) is True and 'STA.' not in x and 'EQUIP' not in x:
+        x.replace('8', 'S')
+        x.replace('5', 'S')
+        if 'ST.' not in x and 'FT.' and 'MT.' not in x:
+            try:
+                return x.split('.')[0]
+            except:
+                return np.nan
+        else:
+            splits = x.split('.')
+            try:
+                if hasNumbers(splits[1]) is False:
+                    return splits[0] + splits[1]
+                else:
+                    return splits[0]
+            except:
+                return np.nan
+    else:
+        return np.nan
+
+def get_company(x):
+    if '---' in x and hasNumbers(x[0:2]) is True:
+        if 'Co.' in x:  #one for split at emdash and Co.
+            try:
+                compstring = x.split('---')[1]
+                if len(compstring) > 2:
+                    company = compstring.split('Co.')[0] + 'Co.'
+                    return company
+                else:
+                    compstring = x.split('---')[0]
+                    company = ''.join((x for x in compstring if not x.isdigit()))
+                    return company
+            except:
+                return np.nan
+        elif len(x.split('---')) > 2:
+            return x.split('---')[1]
+        else:
+            try:
+                return x.split('---')[1]
+            except:
+                return np.nan
+    else:
+        return np.nan
+        
+def get_mile(x):
+    x = x.lower()
+    if len(x) > 20:
+        if 'miles owned' in x: #simplest
+            splitter = 'miles owned'
+            try:
+                str_to_check = x.split(splitter)[0]
+                num_list = re.findall("[+-]?\d+\.+\d+|[+-]?\d+\,+\d+|\d+ \d+|\d+", str_to_check)
+                mile = num_list[len(num_list)-1]
+                return mile
+            except:
+                return 'No'
+        elif '4-8' in x:
+            splits = x.split('4-8')
+            checkpoint = ''.join('' if x is splits[len(splits)-1] else x for x in splits)
+            longs = len(checkpoint) - 1
+            if longs > 180:
+                shorts = longs - 180
+            else:
+                shorts = 0
+            alist = checkpoint[shorts:longs].split(' ')
+            alist = [x for x in alist if len(x) > 4]
+            if fuzz.partial_ratio('miles', x[shorts:longs]) > 75: #miles is in the string
+                try:
+                    splitter = process.extractOne('miles', alist, scorer=fuzz.partial_ratio)[0]
+                    try:
+                        str_to_check = x[shorts:longs].split(splitter)[0]
+                        num_list = re.findall("[+-]?\d+\.+\d+|[+-]?\d+\,+\d+|\d+ \d+|\d+", str_to_check)
+                        mile = num_list[len(num_list)-1]
+                        return mile
+                    except:
+                        return 'No'
+                except:
+                    pass
+            else:
+                return 'No'
+        elif '5-2' in x and '5-2000' not in x:
+            splits = x.split('5-2')
+            checkpoint = ''.join('' if x is splits[len(splits)-1] else x for x in splits)
+            longs = len(checkpoint) - 1
+            if longs > 180:
+                shorts = longs - 180
+            else:
+                shorts = 0
+            alist = checkpoint[shorts:longs].split(' ')
+            alist = [x for x in alist if len(x) > 4 and x is not None]
+            if fuzz.partial_ratio('miles', x[shorts:longs]) > 75: #miles is in the string
+                splitter = process.extractOne('miles', alist, scorer=fuzz.partial_ratio)[0]
+                try:
+                    str_to_check = x[shorts:longs].split(splitter)[0]
+                    num_list = re.findall("[+-]?\d+\.+\d+|[+-]?\d+\,+\d+|\d+ \d+|\d+", str_to_check)
+                    mile = num_list[len(num_list)-1]
+                    return mile
+                except:
+                    return 'No'
+            else:
+                return 'No'
+        else:
+            longs = len(x) - 1
+            if longs > 180:
+                shorts = longs - 180
+            else:
+                shorts = 0
+            if 'miles' in x[shorts:longs]:
+                str_to_check = x[shorts:longs].split('miles')[0]
+                try:
+                    num_list = re.findall("[+-]?\d+\.+\d+|[+-]?\d+\,+\d+|\d+ \d+|\d+", str_to_check)
+                    mile = num_list[len(num_list)-1]
+                    return mile
+                except:
+                    return 'No'
+            else:
+                return 'No'            
+    else:
+        return 'No'
+        
+states1 = [str(i).upper() for i in us.states.STATES]
+states2 = [str(i).upper() + '.' for i in us.states.STATES]
+states = states1 + states2
+
+years = list(range(1917, 1927))
+
+for year in years:
+    df = read_file(year)
+    
+    value = len(df)
+    start = 0
+    end = 0
+    
+    for i in range(value):
+            if 'START OF RECORDS' in df['Info'][i]:
+                start = i
+            elif 'END OF RECORDS' in df['Info'][i]:
+                end = i+1
+
+    df = df.drop(df.index[end:value])
+    df = df.drop(df.index[0:start])
+    df = df.reset_index(drop=True)
+    
+    df['Info'] = df['Info'].str.replace('. 0.', '. O.')
+    df['Info'] = df['Info'].str.replace(', 0.', ', O.')
+    df['Info'] = df['Info'].str.replace('\t', ' ')
+    df = df[df["Info"].str.contains("UNIVERSITY")==False]
+    df = df.reset_index(drop=True)
+    
+    df['State'] = df['Info'].apply(get_state)
+    df['State'] = df['State'].ffill()
+    
+    df['City'] = df['Info'].apply(get_city)
+    df['City'] = df['City'].str.replace('8', 'S')
+    df['City'] = df['City'].ffill()
+
+    df['Miles'] = df['Info'].apply(get_mile)
+    df['Company'] = df['Info'].apply(get_company)
+    df['Company'] = df['Company'].ffill()
+    
+    extract = []
+    
+    for x in range(len(df)):
+            if df['Miles'][x] != 'No':
+                extract.append(x)
+    results = df.take(extract)
+    results = results.drop(columns=['Info'])
+    display(results)
+\end{lstlisting}
+
+\subsection{Fitting the S-curve model}
+\begin{lstlisting}[language=Python]
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+import csv
+import math
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+import us
+from fuzzywuzzy import fuzz
+
+states = [str(i) for i in us.states.STATES] + ['D. C']
+df = pd.read_csv('data.csv')
+df['Year'] = df['Year'].astype(int)
+
+xval = []
+yval = []
+
+years = [1894] + list(range(1898,1912)) + [1914] + list(range(1917, 1927))
+
+place = [] #to record state
+k_optimal = [] #to record best k value
+params_intercept = [] #to record intercept
+params_slope = [] #to record slope
+params_rsquared_adj = [] #to record adj rsquared
+params_pvalue = [] #to record pvalue
+params_stderr_int = [] #to record intercept std error
+params_stderr_slp = [] #to record slope std error
+params_stderr_reg = [] #to record regression std error
+time_inflex = [] #to record t0 
+observes = [] #to record sample size
+incdec = [] #to record if increase or decrease
+
+for state in states:
+    
+        for year in years:
+
+            #gathering data
+            year_sum = 0
+
+            for i in range(len(df)):
+                if df['State'][i] == state and df['Year'][i] == year:
+                    year_sum = year_sum + df['Miles'][i]
+
+            yval.append(year_sum)
+            xval.append(year)
+
+        #finding s-curve
+        k_loc = yval.index(max(yval)) #find the year with max track length
+
+        if k_loc > len(yval) - 3: #it's very close to 1926, no need to make 2 separate s-curves
+            k_start = int(max(yval)) + 1
+            k_range = range(k_start + 1, round(k_start*1.5), 1) #generates a range of k-values to test, up to 150% of maximum
+
+            reg_calc = []
+            rsq_value = -1
+            best_k = 0
+            best_reg_calc = []
+
+            for value in k_range:
+                for i in range(len(yval)):
+                    if yval[i] != 0: #if not a 0 mile year, use the equation ln(miles/k minus miles)
+                        from_ln = np.log(yval[i]/(value - yval[i]))
+                    else:
+                        from_ln = -2 #low discouraging value for regression
+
+                    reg_calc.append(from_ln) #save the value
+
+                #once all reg_calc for that value found, find correlation coefficient, rsq
+                correlation_matrix = np.corrcoef(xval, reg_calc)
+                correlation_xy = correlation_matrix[0,1]
+                r_squared = correlation_xy**2
+
+                if r_squared > rsq_value: #if it's a better rsq than before, store it:
+                    best_k = value
+                    best_reg_calc = reg_calc
+
+                    slope_value, slt0 = np.polyfit(xval, reg_calc, deg=1)
+                    time_0 = -1 * slt0/slope_value
+
+                reg_calc = [] #clear the reg_calc list so the loop can rerun for next k-value
+
+
+            #once optimum k-value acquired:
+
+            s_t = []
+            for i in range(len(best_reg_calc)):
+                power = xval[i] - time_0
+                denom = 1 + math.exp(-1 * slope_value * power)
+                total = best_k/denom
+                s_t.append(total) #the k/1+e^-b(t-t0) equation
+
+            plt.plot(xval, s_t, "tab:orange", label="S-curve")
+            plt.plot(xval, yval, "tab:blue", label="McGraw Hill Data")
+            plt.legend()
+            plt.title(state)
+            plt.xlim(1890, 1930)
+            plt.xlabel('Year')
+            plt.ylabel('Miles of track')
+            plt.show()
+            plt.clf()
+
+            data2 = pd.DataFrame({'x':xval, 'y':best_reg_calc})
+            model = smf.ols('y~x', data=data2).fit()
+
+            #recording of stats
+            place.append(state)
+            observes.append(len(xval))
+            time_inflex.append(time_0)
+            k_optimal.append(best_k)
+            params_intercept.append(model.params[0])
+            params_slope.append(model.params[1])
+            params_rsquared_adj.append(model.rsquared_adj) 
+            params_pvalue.append(model.f_pvalue)
+            params_stderr_int.append(model.bse[0])
+            params_stderr_slp.append(model.bse[1])
+            params_stderr_reg.append(model.scale**0.5)
+            incdec.append('Inc')
+
+            xval = []
+            yval = []
+
+        else: #if there does need to be two s-curves because the peak is in the middle
+            inc_years = xval[:k_loc+1] #split into years with increasing values and years with decreasing values
+            dec_years = xval[k_loc:] 
+
+            inc_values = yval[:k_loc+1] #split into increasing values and decreasing values
+            dec_values = yval[k_loc:]
+            
+            ##for regression with non-zero limits only: remove these two lines if regression with zero limit
+            dec_years.append(1940)
+            dec_values.append(max(yval)/3)
+
+            #for INCREASING years
+            k_start = int(max(yval)) + 1
+            k_range = range(k_start + 1, k_start + 10, 1) #the range of k-values to test - max to max+10 (since known max)
+
+            reg_calc = []
+            rsq_value = -1
+            best_k = 0
+            best_reg_calc = []
+
+            for value in k_range:
+                for i in range(len(inc_values)):
+                    if inc_values[i] != 0:
+                        from_ln = np.log(inc_values[i]/(value-inc_values[i])) #the ln(miles/k minus miles) equation
+                    else:
+                        from_ln = -2
+                    
+                    reg_calc.append(from_ln)
+
+                correlation_matrix = np.corrcoef(inc_years, reg_calc) #find the correlation coefficient and r squared value
+                correlation_xy = correlation_matrix[0,1]
+                r_squared = correlation_xy**2
+
+                if r_squared > rsq_value: #if it's a better rsq than before, store it:
+                    rsq_value = r_squared
+                    best_k = value
+                    best_reg_calc = reg_calc
+
+                    slope_value, slt0 = np.polyfit(inc_years, reg_calc, deg=1)
+                    time_0 = -1 * slt0/slope_value
+
+                reg_calc = [] #clear the equation to run loop again
+
+            inc_s_t = [] #once the best reg_calc has been found:
+
+            for i in range(len(best_reg_calc)):
+                power = inc_years[i] - time_0
+                denom = 1 + math.exp(-1 * slope_value * power)
+                total = best_k/denom
+                inc_s_t.append(total)
+
+            data2 = pd.DataFrame({'x':inc_years, 'y':best_reg_calc})
+            model = smf.ols('y~x', data=data2).fit()
+
+            place.append(state)
+            observes.append(len(inc_years))
+            time_inflex.append(time_0)
+            k_optimal.append(best_k)
+            params_intercept.append(model.params[0])
+            params_slope.append(model.params[1])
+            params_rsquared_adj.append(model.rsquared_adj) 
+            params_pvalue.append(model.f_pvalue)
+            params_stderr_int.append(model.bse[0])
+            params_stderr_slp.append(model.bse[1])
+            params_stderr_reg.append(model.scale**0.5)
+            incdec.append('Inc')
+
+            #for DECREASING years
+
+            dec_reg_calc = []
+
+            for i in range(len(dec_values)):
+                from_ln = np.log(dec_values[i]/(best_k-dec_values[i])) #the ln(miles/k minus miles) equation
+                dec_reg_calc.append(from_ln)
+
+            correlation_matrix = np.corrcoef(dec_years, dec_reg_calc) #find the correlation coefficient and r squared value
+            correlation_xy = correlation_matrix[0,1]
+            r_squared = correlation_xy**2
+
+            slope_value, slt0 = np.polyfit(dec_years, dec_reg_calc, deg=1)
+            time_0 = -1 * slt0/slope_value
+
+            dec_s_t = [] 
+
+            for i in range(len(dec_reg_calc)):
+                power = dec_years[i] - time_0
+                denom = 1 + math.exp(-1 * slope_value * power)
+                total = best_k/denom
+                dec_s_t.append(total)
+
+            data3 = pd.DataFrame({'x':dec_years, 'y':dec_reg_calc})
+            model = smf.ols('y~x', data=data3).fit()
+
+            place.append(state)
+            observes.append(len(dec_years))
+            time_inflex.append(time_0)
+            k_optimal.append(best_k)
+            params_intercept.append(model.params[0])
+            params_slope.append(model.params[1])
+            params_rsquared_adj.append(model.rsquared_adj) 
+            params_pvalue.append(model.f_pvalue)
+            params_stderr_int.append(model.bse[0])
+            params_stderr_slp.append(model.bse[1])
+            params_stderr_reg.append(model.scale**0.5)
+            incdec.append('Dec')
+            
+            ##for non-zero regression ONLY
+            dec_years = dec_years[:-1]
+            dec_values = dec_values[:-1]
+
+            plt.plot(xval, yval, "tab:blue", label="McGraw Hill Data")
+            plt.plot(inc_years, inc_s_t, "tab:orange", label="Increasing S-Curve")
+            plt.plot(dec_years, dec_s_t, "tab:pink", label="Decreasing S-Curve")
+            plt.legend()
+            plt.title(state)
+            plt.xlabel('Year')
+            plt.ylabel('Miles of track')
+            plt.show()
+
+            xval = []
+            yval = []
+
+result = pd.DataFrame({
+        'State' : place,
+        'Sample Size': observes,
+        'K-value' : k_optimal,
+        'Time Zero' : time_inflex,
+        'Intercept' : params_intercept,
+        'Slope' : params_slope,
+        'RSQ-adj' : params_rsquared_adj,
+        'Std error' : params_stderr_reg,
+        'P-value' : params_pvalue,
+        'Intercept error' : params_stderr_int,
+        'Slope error' : params_stderr_slp,
+        'IncDec' : incdec
+    })
+
+display(result)
+\end{lstlisting}

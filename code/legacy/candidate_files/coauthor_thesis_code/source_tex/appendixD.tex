@@ -1,0 +1,145 @@
+\newpage
+\section{Appendix D}
+This appendix presents abbreviated, annotating coding for the extraction and construction of S-curves. The full unannotated coding is present in Appendix E. '---' is used to represent em-dashes.
+
+\subsection{1894-1914}
+\begin{lstlisting}[language=Python]
+def getcities(Info, placelist):
+    if capratio(Info) > 0.7:
+        return Info
+    else:
+        extraction = process.extractOne(Info.lower(), placelist.str.lower(), scorer=fuzz.ratio)
+        #This returns the list [Best Match, Match Ratio]
+        if len(Info) in range(7,25) and extraction[1] > 80 and hasNumbers(Info) is False and abs(len(extraction[0])-len(Info)) < 4:
+                return Info
+        else:
+            return 999
+            
+def cleancities(Cities, citylist):
+    if Cities != 999:
+        section = Cities[0:len(Cities)-4] #Since the index is formatted as [CITY, STATE], this generally removes STATE
+        #Returns the lists for fuzz.ratio and fuzz.partial_ratio
+        fzratio = process.extractOne(section.lower(), citylist, scorer=fuzz.ratio)
+        fzpratio = process.extractOne(section.lower(), citylist, scorer=fuzz.partial_ratio)
+        if fzratio[1] > 80:
+            return fzratio[0]
+        elif fzpratio[1] > 98 and fzratio[1] > 50:
+            return fzpratio[0]
+        else:
+            return np.nan
+    else:
+        return np.nan
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python]
+def getcompanies(Info, City, CompIndex, Phrases, PhraseCheck):
+    if len(Info) > 5:
+        if Phrases is False:
+            if PhraseCheck is True: #checking for phrases
+                for x in CompIndex:
+                        if fuzz.ratio(x[1], CleanCity) > 90:
+                            if x[0] in Info[0:70]:
+                                return x[0]
+                            elif fuzz.partial_ratio(x[0].lower(), Info[0:70].lower()) > 90 and len(Info) > 11:
+                                return x[0]
+                            elif 'Population' in Info: #allowance for longer string
+                                if fuzz.partial_ratio(x[0].lower(), Info[0:140].lower()) > 90:
+                                    return x[0]
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python]
+    def getmiles(Info):
+        if 'Contemplated' not in Info and 'Proposed' not in Info and 'under construction' not in Info[0:40] and 'power plant' not in Info[0:40]:
+        #then there are several possibilities
+        if fuzz.partial_ratio(Info, 'Plant and Equipment') > 80 and len(Info) > 20:
+            if 'total' in Info[0:120]:
+                #then it's either leased, or second track + sidings
+                try:
+                    trial_string = Info.split('total')
+                    if fuzz.partial_ratio(trial_string[0], 'leased') > 80:
+                        mile = (re.findall("[+-]?\d+\.+\d+|\d+", trial_string[0]))[0] #first number after P&E
+                    else: #if not leased
+                        mile = (re.findall("[+-]?\d+\.+\d+|\d+", trial_string[1]))[0] #first number after 'total miles of track'
+                    return mile
+                except:
+                    return 'No'
+#Similar loop run for similarity to 'Miles of track'
+\end{lstlisting}
+
+\subsection{1917 onwards}
+\begin{lstlisting}[language=Python]
+    def get_city(x):
+        if capratio(x) > 0.7 and len(x) > 5 and hasNumbers(x) is True and 'STA.' not in x and 'EQUIP' not in x:
+        x.replace('8', 'S') #avoiding unwanted words, and performing string cleaning
+        x.replace('5', 'S')
+        if 'ST.' not in x and 'FT.' not in x: #to avoid splitting places like Ft. Wayne
+            try:
+                return x.split('.')[0]
+            except:
+                return np.nan
+        else:
+            splits = x.split('.')
+            try:
+                if hasNumbers(splits[1]) is False: #since most places are [CITY. POPULATION]
+                    return splits[0] + splits[1]
+                else:
+                    return splits[0]
+            except:
+                return np.nan
+    else:
+        return np.nan
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python]
+    def get_company(x):
+    if '---' in x and hasNumbers(x[0:2]) is True: #companies are listed as [NUMBER --- company name ---, typically]
+        if 'Co.' in x: 
+            try:
+                compstring = x.split('---')[1]
+                if len(compstring) > 2:
+                    company = compstring.split('Co.')[0] + 'Co.'
+                    return company
+                else:
+                    compstring = x.split('---')[0] 
+                    company = ''.join((x for x in compstring if not x.isdigit())) #remove numbers
+                    return company
+            except:
+                return np.nan
+        elif len(x.split('---')) > 2:
+            return x.split('---')[1]
+        else:
+            try:
+                return x.split('---')[1]
+            except:
+                return np.nan
+    else:
+        return np.nan
+\end{lstlisting}
+
+\begin{lstlisting}
+    def get_mile(x):
+    x = x.lower() #makes lowercase, for better fuzzy matching
+    if len(x) > 20:
+        if 'miles owned' in x: #simplest case
+            splitter = 'miles owned'
+            try:
+                trial_string = x.split(splitter)[0] #since format would be [x total miles owned]
+                num_list = re.findall("[+-]?\d+\.+\d+|[+-]?\d+\,+\d+|\d+ \d+|\d+", trial_string)
+                mile = num_list[len(num_list)-1] #as it's a total miles, the number will be the very last number
+                #after second track, sidings etc.
+                return mile
+            except:
+                return 'No' #easily filterable
+         elif '4-8' in x: #this is how the gauge 4-8+1/2 is generally OCR'd as
+            split = x.split('4-8') 
+            checkpoint = ''.join('' if x is split[len(split)-1] else x for x in split) #rewrites the string
+            longs = len(checkpoint) - 1
+            if longs > 195:
+                shorts = longs - 195
+            else:
+                shorts = 0
+            alist = checkpoint[shorts:longs].split(' ')
+            alist = [x for x in alist if len(x) > 4] #breaks the string into a list of words, for process.extractOne
+            if fuzz.partial_ratio('miles', x[shorts:longs]) > 75: #then run the same loop as the above 'miles owned in x' section
+\end{lstlisting}
+

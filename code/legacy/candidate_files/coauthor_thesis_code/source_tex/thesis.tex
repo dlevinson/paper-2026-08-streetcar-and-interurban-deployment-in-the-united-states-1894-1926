@@ -1,0 +1,211 @@
+% font size 12pt
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc} 
+% A4 paper with 2cm margins
+\usepackage[a4paper,margin=20mm]{geometry}                		
+% See geometry.pdf to learn the layout options. There are lots.
+\usepackage[parfill]{parskip}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{1em}
+% Activate to begin paragraphs with an empty line rather than an indent
+\usepackage{enumitem}
+% for sub-figures
+\usepackage{subfigure}
+\usepackage{lipsum}
+
+% font Times
+\usepackage{mathptmx}
+\usepackage{graphicx}
+\graphicspath{ {./figures/} }
+% Set line spacing to 1.5
+\renewcommand{\baselinestretch}{1.5}
+
+% stops word breaking 
+%\usepackage{microtype}
+\tolerance=1
+\emergencystretch=\maxdimen
+\hyphenpenalty=10000
+\hbadness=10000
+% Use pdf, png, jpg, or epsÃÂ§ with pdflatex; use eps in DVI mode
+								
+								% TeX will automatically convert eps --> pdf in pdflatex		
+\usepackage{amssymb}
+\usepackage{amsmath}
+
+\DeclareMathOperator*{\argmax}{\arg\!\max}
+\DeclareMathOperator*{\argmin}{\arg\!\min}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{wasysym}
+\usepackage{tabu}
+\usepackage{csvsimple}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{graphics}
+\usepackage{comment}
+\usepackage{placeins}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{footnote}
+\usepackage{threeparttable}
+\usepackage{pdflscape}
+\usepackage{float}
+\usepackage{setspace}
+\usepackage{bigstrut}
+\usepackage{rotating}
+\usepackage{longtable}
+\usepackage{indentfirst}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{natbib}
+\usepackage{tabularx}
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily,
+  columns=fullflexible,
+  frame=single,
+  breaklines=true,
+  postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+}
+\graphicspath{ {./images/} }
+% footnote
+\usepackage[bottom]{footmisc}
+% Make the figure indices follow subsubsection number
+\usepackage{chngcntr}
+\counterwithin{figure}{subsection}
+\usepackage{chngcntr}
+\counterwithin{table}{subsection}
+\usepackage{chngcntr}
+\counterwithin{equation}{section}
+
+\hypersetup
+{
+  bookmarks=true,         % show bookmarks 
+  unicode=false,          % non-Latin characters in Acrobat's bookmarks
+  pdftoolbar=true,        % show Acrobat's toolbar?
+  pdfmenubar=true,        % show Acrobat's menu?
+  pdffitwindow=false,     % window fit to page when opened
+  pdfstartview={FitH},    % fits the width of the page to the window
+  pdftitle={My title},    % title
+  pdfauthor={Author},     % author
+  pdfsubject={Subject},   % subject of the document
+  pdfcreator={Creator},   % creator of the document
+  pdfproducer={Producer}, % producer of the document
+  pdfkeywords={keywords}, % list of keywords
+  pdfnewwindow=true,      % links in new window
+  colorlinks=true,       % false: boxed links; true: colored links
+  linkcolor=blue,          % color of internal links
+  citecolor=blue,        % color of links to bibliography
+  filecolor=magenta,      % color of file links
+  urlcolor=blue          % color of external links
+}
+
+
+
+\usepackage{multicol}
+\usepackage{framed}
+\usepackage{tcolorbox}
+
+
+%%%%%%%%%%%%
+% Start
+%\input{src/glossary.tex}
+%\makeglossaries
+\begin{document}
+
+% initial page numbers:  i, ii, iii, ...
+\renewcommand{\thepage}{\roman{page}}	
+%%%%%%%%%%%%
+% Title page
+\begin{titlepage}
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}} 
+\center % Center everything on the page
+\vspace*{\fill}
+\vspace{1cm} 
+{ \LARGE Streetcars Across America: An Analysis of the Growth and Decline of Electric Urban Railways in the United States from Directory Data}\\[0.3cm] % Title of your document
+%	AUTHOR SECTION
+\vspace{3cm} 
+
+\text{\large A Thesis}\\
+\text{\large Submitted in Partial Fulfillment of the Requirements}\\
+\text{\large        For the Degree of}\\
+\text{\large \textit{Bachelor of Engineering}}\\
+\text{\large \textit{In}}\\
+\text{\large \textit{Civil Engineering}}\\[0.2cm] 
+
+\vspace{1cm}
+\text{ By}\\
+\vspace{1cm}
+\text{\large Haoang Li}\\[0.2cm] 
+\text{\large 470416136}\\[1.2cm] 
+
+\text{  Supervisor: Professor David M. Levinson}\\[0.2cm] 
+
+\text{  School of Civil Engineering}\\[0.8cm] 
+
+\text{  University of Sydney, NSW 2006}\\[0.8cm] 
+
+\text{  Australia}\\[0.8cm] 
+
+\text{  November 2021}\\[0.8cm] 
+
+%\text{ A dissertation submitted in partial fulfilment}\\
+%\text{ of the requirements for the award of Honours}\\
+\vspace*{\fill}
+
+\end{titlepage}
+
+% intro pages
+\input{src/abstract.tex}
+\newpage
+\input{src/thanks.tex}
+%\printglossary
+
+
+\setcounter{tocdepth}{2}
+\newpage
+\addcontentsline{section}{Contents}
+\newpage
+\tableofcontents
+\newpage
+\listoffigures
+%\listoftables
+\newpage
+%%%%%%%%%%%%
+% Chapters
+
+\setcounter{page}{1}
+
+
+% main page numbers:  1, 2, 3, ...
+\renewcommand{\thepage}{\arabic{page}}	
+
+
+\input{src/introduction.tex}
+\input{src/litreview.tex}
+\input{src/methods.tex}
+\input{src/results.tex}
+\input{src/conclusion.tex}
+
+%%%%%%%%%%%%
+% End
+
+\newpage
+\bibliographystyle{chicago}
+\bibliography{thesis}
+
+
+% Appendices
+\appendix
+\addtocontents{toc}{\protect\setcounter{tocdepth}{0}}
+\addtocontents{lof}{\protect\setcounter{tocdepth}{0}}
+\graphicspath{ {./figures2/} }
+\input{src/appendixA}
+\input{src/appendixB}
+\graphicspath{ {./figures3/} }
+\input{src/appendixC}
+\input{src/appendixD}
+\input{src/appendixE}
+\addtocontents{toc}{\protect\setcounter{tocdepth}{2}}
+
+\end{document}
