@@ -34,7 +34,8 @@
 ## Local Workbench Contents
 
 - `candidate_files/copied_candidates/streetcar-data-summarised`: Author-derived streetcar summary dataset copied as a candidate package boundary.
-- `candidate_files/coauthor_thesis_code`: Haoang Li thesis PDF/source excerpts, Appendix E code extracted from thesis `lstlisting` blocks, lightly cleaned compile-checked code copies, and the validation workbook comparing machine extraction with student hand-extracted values.
+- `code/legacy/candidate_files/coauthor_thesis_code`: Haoang Li thesis source excerpts, Appendix E code extracted from thesis `lstlisting` blocks, lightly cleaned compile-checked code copies, and the validation workbook comparing machine extraction with student hand-extracted values.
+- `documentation/legacy_context/coauthor_thesis/Haoang_Li_Thesis_Streetcars_doc.pdf`: local thesis PDF copy used as provenance evidence; the public repository handle is listed above.
 - `data/STREETCAR_PACKAGE_MANIFEST.csv`: package manifest with SHA-256 hashes for included data/code/provenance files.
 
 ## Exclusions And Non-Copied Evidence
@@ -77,7 +78,7 @@ Generated: 2026-05-13 14:33:48
 <!-- package-hardening-status:start -->
 ## Package Hardening Status
 
-Generated: 2026-05-20 15:32:54 AEST
+Generated: 2026-05-21 06:40:20 AEST
 
 - Pipeline: `READY-TO-UPLOAD/PUBLIC`
 - Sidecars added/updated: `PACKAGE_STATUS.md`, `PACKAGE_MANIFEST.csv`, `LICENSE_STATUS.md`.

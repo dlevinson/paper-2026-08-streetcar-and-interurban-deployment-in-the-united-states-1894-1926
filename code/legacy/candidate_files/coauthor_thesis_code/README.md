@@ -10,7 +10,7 @@ Li, Haoang. 2021. "Streetcars Across America: An Analysis of the Growth and Decl
 
 ## Contents
 
-- `thesis_pdf/Haoang_Li_Thesis_Streetcars_doc.pdf`: local copy of the thesis PDF used as provenance evidence.
+- `../../../../documentation/legacy_context/coauthor_thesis/Haoang_Li_Thesis_Streetcars_doc.pdf`: local copy of the thesis PDF used as provenance evidence.
 - `source_tex/methods.tex`: thesis methods text describing ABBYY OCR, McGraw/HathiTrust source directories, regex/string extraction, manual post-processing, validation, and S-curve modelling.
 - `source_tex/appendixD.tex`: abbreviated annotated code in the thesis appendix.
 - `source_tex/appendixE.tex`: full code appendix from which the extracted code files were generated.
