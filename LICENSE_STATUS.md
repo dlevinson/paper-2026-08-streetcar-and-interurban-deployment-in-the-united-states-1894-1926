@@ -1,6 +1,6 @@
 # License Status: Streetcar And Interurban Deployment In The United States: 1894–1926
 
-Generated: 2026-05-22 06:51:10 AEST
+Generated: 2026-05-22 07:46:52 AEST
 
 Recorded license/access note from the verified audit row: HathiTrust public-domain/Google-digitized source terms noted in hydrated OCR text; raw source documents should be cited, not re-hosted.
 
