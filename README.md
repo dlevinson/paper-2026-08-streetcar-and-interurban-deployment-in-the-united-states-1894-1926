@@ -60,7 +60,7 @@ Generated: 2026-05-13 14:33:48
 - Crosswalk status: `VERIFIED-CONFIRMED_PATH_REBOUND`; confidence: `high_after_source_check`.
 - Confirmed or reconciled source path(s): `{DROPBOX_DATA}/Streetcars` -> `/Users/dlev2617/Sydney Uni Dropbox/David Levinson/Streetcars` (exists)
 - Logical check: The paper is the US streetcar/interurban deployment paper; the Dropbox-root Streetcars folder contains McGraw/manual source documents plus derived master sheets and data_the_big_one.csv in Streetcar Data Summarised.
-- Package implication: Keep READY-TO-UPLOAD/PUBLIC, but document that public McGraw/Hathi-style source PDFs/texts do not need re-archiving; the derived dataset and authored scripts/README are the archive boundary.
+- Package implication: Keep UPLOADED, but document that public McGraw/Hathi-style source PDFs/texts do not need re-archiving; the derived dataset and authored scripts/README are the archive boundary.
 - Release boundary: Public derived-data/code package; external public source documents by pointer only.
 - Remaining work: Confirm final derived-data variables/provenance and ensure any OCR/text extracts are treated as intermediate unless needed to reproduce the derived dataset.
 <!-- linked-data-crosswalk-note:end -->
@@ -80,7 +80,7 @@ Generated: 2026-05-13 14:33:48
 
 Generated: 2026-05-22 07:46:52 AEST
 
-- Pipeline: `READY-TO-UPLOAD/PUBLIC`
+- Pipeline: `UPLOADED`
 - Sidecars added/updated: `PACKAGE_STATUS.md`, `PACKAGE_MANIFEST.csv`, `LICENSE_STATUS.md`.
 - Public paper-package repositories include `paper/` PDF reference copies by owner decision; publisher takedown requests can be handled later if they arise.
 - Final GitHub upload should use the manifest include statuses and the license-status note.
