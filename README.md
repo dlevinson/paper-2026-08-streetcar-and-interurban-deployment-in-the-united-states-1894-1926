@@ -1,6 +1,10 @@
 <!-- Updated by Codex targeted correction on 2026-05-13 -->
 # Streetcar And Interurban Deployment In The United States: 1894–1926
 
+## Contribution
+
+This paper creates the first wide-scale quantitative account of United States streetcar and interurban deployment from 1894 to 1926. OCR-derived and manually validated directory records reveal the magnitude and timing of network growth by city and state, document the 1918 national peak, and show that most deployment histories follow logistic S-curves.
+
 ## Bibliographic Information
 
 - Row ID: `paper-2026-08`
