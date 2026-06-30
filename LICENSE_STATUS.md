@@ -2,12 +2,14 @@
 
 Generated: 2026-05-22 07:46:52 AEST
 
-Recorded license/access note from the verified audit row: HathiTrust public-domain/Google-digitized source terms noted in hydrated OCR text; raw source documents should be cited, not re-hosted.
-
-Before public GitHub upload, add an explicit license for author-created code/data or mark the package as citation/provenance-only. Do not license third-party raw data or publisher PDFs.
+The repository now has an operative CC BY-SA 4.0 root license that matches
+the published Findings license signal and the staged thesis-derived code and
+derived data boundary.
 
 ## Practical Rule
 
-- Author-created code can receive an explicit software license only after finality/provenance is confirmed.
-- Author-created data/derived tables can receive an explicit data/documentation license only after source rights are clear.
-- Third-party raw data and publisher PDFs are not relicensed here.
+- Root license: CC BY-SA 4.0 for author-created code, derived data, and
+  documentation.
+- Paper PDFs, the public thesis PDF, and third-party/public-source materials
+  retain their original terms.
+- `LICENSE.md` is the operative root license; the manifest should include it.

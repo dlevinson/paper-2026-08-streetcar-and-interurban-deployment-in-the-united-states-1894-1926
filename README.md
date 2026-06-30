@@ -35,6 +35,17 @@ This paper creates the first wide-scale quantitative account of United States st
 - HathiTrust and McGraw source directories are public/source evidence only and are not re-hosted here.
 - McGraw OCR/text extracts are treated as intermediate products, not archive targets.
 
+## License
+
+The repository's author-created code, derived data, and documentation are
+licensed under Creative Commons Attribution-ShareAlike 4.0 International
+(CC BY-SA 4.0). The operative root license is `LICENSE.md`.
+
+The published paper PDF in `paper/`, the public thesis/provenance PDF in
+`documentation/legacy_context/coauthor_thesis/`, and any third-party or
+public-source materials retain their original terms and are not relicensed
+here.
+
 ## Local Workbench Contents
 
 - `candidate_files/copied_candidates/streetcar-data-summarised`: Author-derived streetcar summary dataset copied as a candidate package boundary.
@@ -85,7 +96,7 @@ Generated: 2026-05-13 14:33:48
 Generated: 2026-05-22 07:46:52 AEST
 
 - Pipeline: `UPLOADED`
-- Sidecars added/updated: `PACKAGE_STATUS.md`, `PACKAGE_MANIFEST.csv`, `LICENSE_STATUS.md`.
+- Sidecars added/updated: `LICENSE.md`, `PACKAGE_STATUS.md`, `PACKAGE_MANIFEST.csv`, `LICENSE_STATUS.md`.
 - Public paper-package repositories include `paper/` PDF reference copies by owner decision; publisher takedown requests can be handled later if they arise.
-- Final GitHub upload should use the manifest include statuses and the license-status note.
+- Final GitHub upload should use the manifest include statuses and the operative root license.
 <!-- package-hardening-status:end -->
