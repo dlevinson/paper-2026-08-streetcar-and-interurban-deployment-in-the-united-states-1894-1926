@@ -12,10 +12,11 @@ Generated: 2026-05-22 07:46:52 AEST
 - Controlled access status: `none`
 - Human subjects status: `no`
 - Bibliographic citation: Li, Lahoorpoor, Levinson. (2026). Streetcar And Interurban Deployment In The United States: 1894–1926. Findings (2026). 10.32866/001c.155283
+- Root license: CC BY-SA 4.0
 
 ## Package Checks
 
-- Files in manifest: 29
+- Files in manifest: 30
 - Paper reference files: 2
 - Code candidates: 17
 - Data candidates: 0
@@ -25,5 +26,6 @@ Generated: 2026-05-22 07:46:52 AEST
 ## Upload Boundary
 
 - Use `PACKAGE_MANIFEST.csv` as the upload checklist.
+- The operative repository license is CC BY-SA 4.0 in `LICENSE.md`.
 - Include `paper/` PDF reference copies in public paper-package repositories by owner decision; publisher takedown requests can be handled later if they arise.
 - Confirm finality and license before repository creation.
